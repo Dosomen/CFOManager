@@ -1,6 +1,6 @@
 # PROJ-1: Supabase Infrastruktur + Multi-Mandant Auth/Login
 
-## Status: Planned
+## Status: Architected
 **Created:** 2026-05-24
 **Last Updated:** 2026-05-24
 
@@ -83,6 +83,8 @@
 - [ ] Sollen Login-Versuche zusätzlich in einem eigenen Audit-Log gespeichert werden, oder reicht das Supabase-eigene Logging?
 - [ ] Sollen wir die Supabase-Default-E-Mail-Templates (Passwort-Reset, 2FA) sofort branded anpassen oder erst in P1?
 - [ ] Brauchen wir Impressum/Datenschutz-Footer auf der Login-Seite (rechtliche Pflicht auch für interne Tools)?
+- [ ] Welcher Supabase-Plan: Free reicht für MVP, aber Point-in-Time-Recovery gibt es erst ab Pro (25 $/Monat). Vor Echtbetrieb mit Finanzdaten auf Pro upgraden?
+- [ ] Status-Field & Last-Updated der Spec hier: 2026-05-24 — sollte aktualisiert werden bei jeder größeren Änderung.
 
 ## Decision Log
 
@@ -101,13 +103,119 @@
 | Diamant-Mandantennummer optional erfassen | Wird in PROJ-2 für Import-Matching gebraucht; Eingabe jetzt erspart Nachpflege. | 2026-05-24 |
 
 ### Technical Decisions
-_To be added by /architecture_
+| Decision | Rationale | Date |
+|----------|-----------|------|
+| Supabase Auth statt eigene Auth (NextAuth/custom) | Login, Reset, Rate-Limit, 2FA out-of-the-box; spart Wochen Entwicklung | 2026-05-24 |
+| Supabase Cloud, Region Frankfurt (eu-central-1) | DSGVO-Pflicht für Finanzdaten; US-Region würde EU-Datentransfer-Recht verletzen | 2026-05-24 |
+| `@supabase/ssr` (HttpOnly Cookies) statt Browser-Client + localStorage | XSS-resistente Session; Server Components lesen Session direkt | 2026-05-24 |
+| Next.js Server Actions statt eigene REST-Routen | Weniger Code, type-safe Ende-zu-Ende, funktioniert ohne JS-Client | 2026-05-24 |
+| Middleware-basierter Auth-Check | Zentrale Logik verhindert vergessene Per-Page-Checks | 2026-05-24 |
+| Row Level Security auf DB-Ebene | Defense in Depth — auch wenn Application-Code fehlt, blockiert die DB den Zugriff | 2026-05-24 |
+| Aktiver Mandant in `user_profiles.active_mandant_id` (DB) statt Cookie | Cross-Device, übersteht Cookie-Clear, Server-readable ohne Extra-Roundtrip | 2026-05-24 |
+| M:N Join-Tabelle `mandant_users` (statt User-FK in `mandanten`) | Bereit für PROJ-8 (mehrere User pro Mandant) | 2026-05-24 |
+| Hard-Delete mit CASCADE statt Soft-Delete | Einfacher; Supabase Point-in-Time-Recovery als Backup-Netz | 2026-05-24 |
+| DB-Trigger: bei Mandant-Insert automatisch `mandant_users`-Eintrag für Creator | Verhindert Race Condition zwischen INSERT und RLS-SELECT direkt nach Anlage | 2026-05-24 |
+| Drei Tabellen (mandanten, mandant_users, user_profiles) | Klare Trennung: Stammdaten / Beziehung / Per-User-State | 2026-05-24 |
+| React Hook Form + Zod für Forms und Server Actions | Schon installiert; gleiches Schema in Form + Action = single source of truth | 2026-05-24 |
+| shadcn/ui `sidebar.tsx` als App-Shell-Basis | Vorhanden, accessible, responsive, einklappbar — kein Eigenbau nötig | 2026-05-24 |
+| Deutsche Texte in zentraler `messages/de.ts`-Datei | Vorbereitung auf späteres `next-intl` für P2 Englisch | 2026-05-24 |
 
 ---
 <!-- Sections below are added by subsequent skills -->
 
 ## Tech Design (Solution Architect)
-_To be added by /architecture_
+
+### Komponenten-Struktur
+
+```
+App-Root
+├── (public) — keine Auth nötig
+│   ├── /login                       Login-Form (E-Mail + Passwort)
+│   ├── /passwort-vergessen          E-Mail-Eingabe für Reset-Link
+│   └── /passwort-zuruecksetzen      Neues Passwort setzen (Token aus URL)
+│
+├── (onboarding) — eingeloggt, aber noch kein Mandant
+│   └── /onboarding                  Mandanten-Wizard (Vollbild)
+│
+└── (app) — eingeloggt + mindestens 1 Mandant (Middleware-geschützt)
+    ├── App-Shell
+    │   ├── Topbar (links: App-Logo + Mandant-Switcher; rechts: User-Menu)
+    │   └── Sidebar (Dashboard, Mandanten, Einstellungen)
+    │
+    ├── /dashboard                   Leere Platzhalter-Seite (PROJ-3 füllt sie)
+    │
+    ├── /mandanten                   Liste aller Mandanten des Users
+    │   ├── Tabelle (Name, Rechtsform, Währung, GJ-Start, Aktionen)
+    │   ├── Dialog: Neuer Mandant   (gleiche Felder wie Wizard)
+    │   ├── Dialog: Mandant bearbeiten
+    │   └── Dialog: Mandant löschen (mit Namens-Bestätigung)
+    │
+    └── /einstellungen
+        ├── Sektion: Passwort ändern
+        └── Sektion: 2FA (Status, Aktivieren-Flow mit QR + Recovery-Codes)
+```
+
+### Datenmodell
+
+Drei Tabellen in Supabase Postgres:
+
+**`mandanten`** — eine Zeile pro Gesellschaft
+- `id` (uuid, PK), `name`, `rechtsform`, `basiswaehrung` (Default `EUR`), `geschaeftsjahr_start` (Default `01-01`)
+- Optional: `ust_idnr`, `diamant_mandantennummer`
+- Metadaten: `created_at`, `created_by` (FK auf `auth.users`)
+
+**`mandant_users`** — M:N-Join „welcher User darf welchen Mandanten sehen"
+- `mandant_id` + `user_id` + `created_at` (Composite PK)
+- Im MVP keine Rollen; PROJ-8 ergänzt `rolle`-Spalte
+
+**`user_profiles`** — Per-User-Metadaten
+- `user_id` (PK, FK auf `auth.users`), `active_mandant_id` (FK auf `mandanten`, ON DELETE SET NULL)
+- Single Source of Truth für „welchen Mandanten sehe ich gerade" — überlebt Geräte/Tabs/Refresh
+
+**DB-Trigger (Automatik):**
+- Bei `auth.users`-INSERT → automatisch `user_profiles`-Eintrag (active_mandant_id leer)
+- Bei `mandanten`-INSERT → automatisch `mandant_users`-Eintrag für `created_by`
+- Bei `mandanten`-DELETE → CASCADE auf `mandant_users`; `user_profiles.active_mandant_id` → NULL
+
+**Row Level Security:**
+- `mandanten`: SELECT/UPDATE/DELETE nur wenn User in `mandant_users` für diesen Mandanten; INSERT für alle authentifizierten User
+- `mandant_users`: SELECT/INSERT/DELETE nur eigene Zeilen (im MVP)
+- `user_profiles`: SELECT/UPDATE nur eigene Zeile
+
+### Daten-Flow „User loggt sich ein"
+
+1. User öffnet `/dashboard` → Middleware: keine Session → Redirect zu `/login?next=/dashboard`
+2. User submitted Login-Form → Server Action ruft Supabase Auth → Session-Cookie gesetzt
+3. Falls 2FA aktiv: TOTP-Abfrage als zweiter Schritt
+4. Server prüft `user_profiles.active_mandant_id`:
+   - leer + keine Mandanten → Redirect `/onboarding`
+   - leer + ≥ 1 Mandant → ersten als aktiv setzen, Redirect `next`
+   - gesetzt → Redirect `next`
+5. App-Shell liest aktiven Mandanten serverseitig und zeigt Namen in Topbar
+
+### Supabase-Konfiguration (vor erstem Backend-Run)
+
+- Neues Supabase-Projekt (Region: Frankfurt)
+- ENV: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server-only)
+- Auth: E-Mail-Confirmation aus (Invite-Only); Passwort-Mindestlänge 12; MFA-TOTP aktiviert
+- Session-Dauer: 8 h (JWT expiry)
+- Storage: leer (kein Logo-Upload im MVP)
+
+### Migrations (Reihenfolge)
+
+1. `001_create_mandanten_table`
+2. `002_create_mandant_users_join`
+3. `003_create_user_profiles_table`
+4. `004_create_user_profile_trigger` (on auth.users insert)
+5. `005_create_mandant_owner_trigger` (on mandanten insert)
+6. `006_setup_rls_policies` (alle drei Tabellen)
+
+### Neue Dependencies
+
+- **`@supabase/ssr`** — Cookie-basierte Session in Server Components & Middleware
+- **`zod`** — Schema-Validation für Forms + Server Actions
+
+Bereits vorhanden: `@supabase/supabase-js`, `react-hook-form`, `@hookform/resolvers`, alle shadcn-Komponenten, `lucide-react`.
 
 ## QA Test Results
 _To be added by /qa_
