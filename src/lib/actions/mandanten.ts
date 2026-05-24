@@ -50,6 +50,7 @@ export async function createMandantAction(
     .single()
 
   if (error || !data) {
+    console.error('[createMandantAction] insert failed', { error, user: user.id })
     return { ok: false, error: de.mandant.errors.unexpectedError }
   }
 

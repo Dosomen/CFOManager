@@ -1,6 +1,6 @@
 # PROJ-1: Supabase Infrastruktur + Multi-Mandant Auth/Login
 
-## Status: In Progress
+## Status: In Review
 **Created:** 2026-05-24
 **Last Updated:** 2026-05-24
 
