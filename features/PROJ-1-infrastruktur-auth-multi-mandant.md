@@ -1,6 +1,6 @@
 # PROJ-1: Supabase Infrastruktur + Multi-Mandant Auth/Login
 
-## Status: Architected
+## Status: In Progress
 **Created:** 2026-05-24
 **Last Updated:** 2026-05-24
 
@@ -122,6 +122,35 @@
 
 ---
 <!-- Sections below are added by subsequent skills -->
+
+## Implementation Notes (Backend)
+
+**Migration applied:** `supabase/migrations/20260524130000_initial_schema.sql` — pushed to remote (CFO1, Frankfurt) via `supabase db push`.
+
+**Created server-side files:**
+- `src/lib/supabase/{server,client,middleware}.ts` — three Supabase clients (Server Components, Browser, Middleware)
+- `src/middleware.ts` — auth gating; public routes: `/login`, `/passwort-vergessen`, `/passwort-zuruecksetzen`
+- `src/lib/messages/de.ts` — central German UI strings
+- `src/lib/validators/{auth,mandant}.ts` — Zod schemas
+- `src/lib/actions/types.ts` — shared `ActionResult<T>` + form-data + Zod-error helpers
+- `src/lib/actions/auth.ts` — login, logout, password reset, change password, 2FA enroll/verify/unenroll/list, MFA login verify
+- `src/lib/actions/mandanten.ts` — create, update, delete, switch active
+- `src/lib/mandant/active.ts` — server helper that resolves the active mandant with fallback to first accessible
+- `src/lib/types/database.ts` — generated from live schema via `supabase gen types typescript`
+
+**Tests:** 26 unit tests in `src/lib/validators/{auth,mandant}.test.ts` — all passing.
+
+**Dependencies added:** `@supabase/ssr` 0.x, `zod` 4.4.3.
+
+**Deviations from spec/design:**
+- Removed placeholder `src/lib/supabase.ts` (was a no-op exporting `null`).
+- Active-mandant resolver auto-promotes the first accessible mandant if `active_mandant_id` is stale (instead of forcing the user to pick), so a single-mandant user is never stranded.
+
+**Pending (handed off to `/frontend`):**
+- All UI pages (login, password-reset request/confirm, onboarding wizard, dashboard placeholder, mandanten list + CRUD dialogs, account settings + 2FA flow)
+- App-shell (sidebar + topbar with mandant switcher and user menu)
+- `(app)/layout.tsx` redirect to `/onboarding` when no mandant exists
+- `next` query-param handling on the login page after successful auth
 
 ## Tech Design (Solution Architect)
 
