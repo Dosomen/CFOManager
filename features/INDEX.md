@@ -16,7 +16,7 @@
 | ID | Feature | Priority | Status | Dependencies | Spec | Created |
 |----|---------|----------|--------|--------------|------|---------|
 | PROJ-1 | Supabase Infrastruktur + Multi-Mandant Auth/Login | P0 | In Review | None | [PROJ-1](./PROJ-1-infrastruktur-auth-multi-mandant.md) | 2026-05-24 |
-| PROJ-2 | Diamant Datei-Import (CSV/Excel/XML) | P0 | Roadmap | PROJ-1 | _pending_ | 2026-05-24 |
+| PROJ-2 | Diamant Datei-Import (Excel; CSV/XML in P1) | P0 | Planned | PROJ-1 | [PROJ-2](./PROJ-2-diamant-datei-import.md) | 2026-05-24 |
 | PROJ-3 | Reporting & Dashboards (GuV, Bilanz, KPIs) | P0 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
 | PROJ-4 | Liquiditätsplanung & Cash Management | P1 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
 | PROJ-5 | Planung & Forecasting (xP&A) | P1 | Roadmap | PROJ-1, PROJ-2, PROJ-3 | _pending_ | 2026-05-24 |
