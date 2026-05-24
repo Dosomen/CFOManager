@@ -5,13 +5,14 @@ const PUBLIC_ROUTES = new Set<string>([
   '/login',
   '/passwort-vergessen',
   '/passwort-zuruecksetzen',
+  '/auth/callback',
 ])
 
 function isPublicRoute(pathname: string): boolean {
   return PUBLIC_ROUTES.has(pathname)
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
   const { pathname, search } = request.nextUrl
 

@@ -11,10 +11,12 @@ export const rechtsformValues = [
 
 export type Rechtsform = (typeof rechtsformValues)[number]
 
-const emptyStringToUndefined = (v: unknown) =>
-  typeof v === 'string' && v.trim() === '' ? undefined : v
-
-export const mandantInputSchema = z.object({
+/**
+ * Form schema — all fields are strings.
+ * Optional fields accept empty strings; the server treats empty as "not set"
+ * and writes NULL to the database.
+ */
+export const mandantFormSchema = z.object({
   name: z
     .string()
     .trim()
@@ -25,35 +27,23 @@ export const mandantInputSchema = z.object({
   }),
   basiswaehrung: z
     .string()
-    .regex(/^[A-Z]{3}$/, 'ISO-Code aus 3 Großbuchstaben, z.B. EUR.')
-    .default('EUR'),
+    .regex(/^[A-Z]{3}$/, 'ISO-Code aus 3 Großbuchstaben, z.B. EUR.'),
   geschaeftsjahr_start: z
     .string()
     .regex(
       /^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/,
       'Format MM-TT, z.B. 01-01.'
-    )
-    .default('01-01'),
-  ust_idnr: z.preprocess(
-    emptyStringToUndefined,
-    z
-      .string()
-      .trim()
-      .min(4, 'USt-IdNr muss mindestens 4 Zeichen lang sein.')
-      .max(20, 'USt-IdNr darf höchstens 20 Zeichen lang sein.')
-      .optional()
+    ),
+  ust_idnr: z.string().refine(
+    (v) => v === '' || (v.trim().length >= 4 && v.trim().length <= 20),
+    { message: 'USt-IdNr muss 4–20 Zeichen lang sein.' }
   ),
-  diamant_mandantennummer: z.preprocess(
-    emptyStringToUndefined,
-    z
-      .string()
-      .trim()
-      .max(50, 'Mandantennummer darf höchstens 50 Zeichen lang sein.')
-      .optional()
-  ),
+  diamant_mandantennummer: z
+    .string()
+    .max(50, 'Mandantennummer darf höchstens 50 Zeichen lang sein.'),
 })
 
-export const updateMandantSchema = mandantInputSchema.extend({
+export const updateMandantSchema = mandantFormSchema.extend({
   id: z.uuid('Ungültige Mandant-ID.'),
 })
 
@@ -66,7 +56,9 @@ export const switchMandantSchema = z.object({
   mandantId: z.uuid('Ungültige Mandant-ID.'),
 })
 
-export type MandantInput = z.infer<typeof mandantInputSchema>
+export type MandantFormValues = z.infer<typeof mandantFormSchema>
+// Kept for callers that referenced the old name (forms use MandantFormValues).
+export type MandantInput = MandantFormValues
 export type UpdateMandantInput = z.infer<typeof updateMandantSchema>
 export type DeleteMandantInput = z.infer<typeof deleteMandantSchema>
 export type SwitchMandantInput = z.infer<typeof switchMandantSchema>

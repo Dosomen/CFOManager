@@ -1,122 +1,116 @@
 import { describe, expect, it } from 'vitest'
 import {
   deleteMandantSchema,
-  mandantInputSchema,
+  mandantFormSchema,
   switchMandantSchema,
   updateMandantSchema,
 } from './mandant'
 
 const UUID = '550e8400-e29b-41d4-a716-446655440000'
 
-describe('mandantInputSchema', () => {
-  it('accepts a minimal valid input and applies defaults', () => {
-    const result = mandantInputSchema.safeParse({
-      name: 'Beispiel GmbH',
-      rechtsform: 'GmbH',
-    })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.basiswaehrung).toBe('EUR')
-      expect(result.data.geschaeftsjahr_start).toBe('01-01')
-      expect(result.data.ust_idnr).toBeUndefined()
-      expect(result.data.diamant_mandantennummer).toBeUndefined()
-    }
+const baseValid = {
+  name: 'Beispiel GmbH',
+  rechtsform: 'GmbH' as const,
+  basiswaehrung: 'EUR',
+  geschaeftsjahr_start: '01-01',
+  ust_idnr: '',
+  diamant_mandantennummer: '',
+}
+
+describe('mandantFormSchema', () => {
+  it('accepts a minimal valid input with empty optional fields', () => {
+    expect(mandantFormSchema.safeParse(baseValid).success).toBe(true)
   })
 
   it('trims and rejects empty names', () => {
     expect(
-      mandantInputSchema.safeParse({ name: '   ', rechtsform: 'GmbH' }).success
+      mandantFormSchema.safeParse({ ...baseValid, name: '   ' }).success
     ).toBe(false)
   })
 
   it('rejects names longer than 200 characters', () => {
     expect(
-      mandantInputSchema.safeParse({
-        name: 'a'.repeat(201),
-        rechtsform: 'GmbH',
-      }).success
+      mandantFormSchema.safeParse({ ...baseValid, name: 'a'.repeat(201) }).success
     ).toBe(false)
   })
 
   it('rejects unknown rechtsform values', () => {
     expect(
-      mandantInputSchema.safeParse({
-        name: 'Test',
-        rechtsform: 'Limited',
-      }).success
+      mandantFormSchema.safeParse({ ...baseValid, rechtsform: 'Limited' as never })
+        .success
     ).toBe(false)
   })
 
   it('accepts all valid rechtsform values', () => {
-    const all = ['GmbH', 'AG', 'UG', 'GmbH_und_Co_KG', 'Einzelunternehmen', 'Sonstiges']
+    const all = [
+      'GmbH',
+      'AG',
+      'UG',
+      'GmbH_und_Co_KG',
+      'Einzelunternehmen',
+      'Sonstiges',
+    ] as const
     for (const rechtsform of all) {
       expect(
-        mandantInputSchema.safeParse({ name: 'Test', rechtsform }).success
+        mandantFormSchema.safeParse({ ...baseValid, rechtsform }).success
       ).toBe(true)
     }
   })
 
   it('rejects non-ISO currency codes', () => {
     expect(
-      mandantInputSchema.safeParse({
-        name: 'Test',
-        rechtsform: 'GmbH',
-        basiswaehrung: 'eur',
-      }).success
+      mandantFormSchema.safeParse({ ...baseValid, basiswaehrung: 'eur' }).success
     ).toBe(false)
     expect(
-      mandantInputSchema.safeParse({
-        name: 'Test',
-        rechtsform: 'GmbH',
-        basiswaehrung: 'EU',
-      }).success
+      mandantFormSchema.safeParse({ ...baseValid, basiswaehrung: 'EU' }).success
     ).toBe(false)
   })
 
   it('rejects invalid geschaeftsjahr_start format', () => {
     expect(
-      mandantInputSchema.safeParse({
-        name: 'Test',
-        rechtsform: 'GmbH',
+      mandantFormSchema.safeParse({
+        ...baseValid,
         geschaeftsjahr_start: '13-01',
       }).success
     ).toBe(false)
     expect(
-      mandantInputSchema.safeParse({
-        name: 'Test',
-        rechtsform: 'GmbH',
+      mandantFormSchema.safeParse({
+        ...baseValid,
         geschaeftsjahr_start: '01-32',
       }).success
     ).toBe(false)
     expect(
-      mandantInputSchema.safeParse({
-        name: 'Test',
-        rechtsform: 'GmbH',
+      mandantFormSchema.safeParse({
+        ...baseValid,
         geschaeftsjahr_start: '1-1',
       }).success
     ).toBe(false)
   })
 
-  it('treats empty optional strings as undefined', () => {
-    const result = mandantInputSchema.safeParse({
-      name: 'Test',
-      rechtsform: 'GmbH',
+  it('treats empty optional strings as "not set"', () => {
+    const result = mandantFormSchema.safeParse({
+      ...baseValid,
       ust_idnr: '',
       diamant_mandantennummer: '',
     })
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.ust_idnr).toBeUndefined()
-      expect(result.data.diamant_mandantennummer).toBeUndefined()
+      expect(result.data.ust_idnr).toBe('')
+      expect(result.data.diamant_mandantennummer).toBe('')
     }
   })
 
-  it('rejects ust_idnr shorter than 4 characters', () => {
+  it('rejects ust_idnr shorter than 4 characters when provided', () => {
     expect(
-      mandantInputSchema.safeParse({
-        name: 'Test',
-        rechtsform: 'GmbH',
-        ust_idnr: 'DE1',
+      mandantFormSchema.safeParse({ ...baseValid, ust_idnr: 'DE1' }).success
+    ).toBe(false)
+  })
+
+  it('rejects diamant_mandantennummer longer than 50 characters', () => {
+    expect(
+      mandantFormSchema.safeParse({
+        ...baseValid,
+        diamant_mandantennummer: 'a'.repeat(51),
       }).success
     ).toBe(false)
   })
@@ -125,15 +119,11 @@ describe('mandantInputSchema', () => {
 describe('updateMandantSchema', () => {
   it('requires a valid UUID id', () => {
     expect(
-      updateMandantSchema.safeParse({
-        id: 'not-a-uuid',
-        name: 'X',
-        rechtsform: 'GmbH',
-      }).success
+      updateMandantSchema.safeParse({ ...baseValid, id: 'not-a-uuid' }).success
     ).toBe(false)
-    expect(
-      updateMandantSchema.safeParse({ id: UUID, name: 'X', rechtsform: 'GmbH' }).success
-    ).toBe(true)
+    expect(updateMandantSchema.safeParse({ ...baseValid, id: UUID }).success).toBe(
+      true
+    )
   })
 })
 

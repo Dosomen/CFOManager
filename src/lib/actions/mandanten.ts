@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import {
   deleteMandantSchema,
-  mandantInputSchema,
+  mandantFormSchema,
   switchMandantSchema,
   updateMandantSchema,
 } from '@/lib/validators/mandant'
@@ -20,7 +20,7 @@ export async function createMandantAction(
   _prev: ActionResult<{ id: string }> | null,
   formData: FormData
 ): Promise<ActionResult<{ id: string }>> {
-  const parsed = mandantInputSchema.safeParse(formDataToObject(formData))
+  const parsed = mandantFormSchema.safeParse(formDataToObject(formData))
   if (!parsed.success) {
     return {
       ok: false,
@@ -42,8 +42,8 @@ export async function createMandantAction(
       rechtsform: parsed.data.rechtsform,
       basiswaehrung: parsed.data.basiswaehrung,
       geschaeftsjahr_start: parsed.data.geschaeftsjahr_start,
-      ust_idnr: parsed.data.ust_idnr ?? null,
-      diamant_mandantennummer: parsed.data.diamant_mandantennummer ?? null,
+      ust_idnr: parsed.data.ust_idnr || null,
+      diamant_mandantennummer: parsed.data.diamant_mandantennummer || null,
       created_by: user.id,
     })
     .select('id')
@@ -84,8 +84,8 @@ export async function updateMandantAction(
       rechtsform: parsed.data.rechtsform,
       basiswaehrung: parsed.data.basiswaehrung,
       geschaeftsjahr_start: parsed.data.geschaeftsjahr_start,
-      ust_idnr: parsed.data.ust_idnr ?? null,
-      diamant_mandantennummer: parsed.data.diamant_mandantennummer ?? null,
+      ust_idnr: parsed.data.ust_idnr || null,
+      diamant_mandantennummer: parsed.data.diamant_mandantennummer || null,
     })
     .eq('id', parsed.data.id)
 

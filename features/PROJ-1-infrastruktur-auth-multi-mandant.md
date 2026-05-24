@@ -146,11 +146,41 @@
 - Removed placeholder `src/lib/supabase.ts` (was a no-op exporting `null`).
 - Active-mandant resolver auto-promotes the first accessible mandant if `active_mandant_id` is stale (instead of forcing the user to pick), so a single-mandant user is never stranded.
 
-**Pending (handed off to `/frontend`):**
-- All UI pages (login, password-reset request/confirm, onboarding wizard, dashboard placeholder, mandanten list + CRUD dialogs, account settings + 2FA flow)
-- App-shell (sidebar + topbar with mandant switcher and user menu)
-- `(app)/layout.tsx` redirect to `/onboarding` when no mandant exists
-- `next` query-param handling on the login page after successful auth
+## Implementation Notes (Frontend)
+
+**Pages (App Router, route groups for layouts):**
+- `(public)/login` — login form with `?next=` post-auth bounce (wrapped in `<Suspense>` for static-export compatibility)
+- `(public)/passwort-vergessen` — request-reset form (always shows generic success message)
+- `(public)/passwort-zuruecksetzen` — confirm-reset form (requires recovery session, else redirects to `/passwort-vergessen`)
+- `(onboarding)/onboarding` — full-screen mandant wizard (auto-redirects to `/dashboard` if mandant already exists)
+- `(app)/dashboard` — placeholder with active-mandant name (PROJ-3 fills it)
+- `(app)/mandanten` — table + create/edit/delete dialogs
+- `(app)/einstellungen` — password change + 2FA setup
+- `auth/callback` — exchanges OAuth code for session and redirects to `next`
+
+**App shell:** `src/components/shell/app-shell.tsx` uses shadcn `<Sidebar>` with topbar containing `<MandantSwitcher>` (left) and `<UserMenu>` (right).
+
+**Components:**
+- `src/components/auth/{login-form, mfa-prompt, password-reset-request-form, password-reset-confirm-form, change-password-form, mfa-setup}.tsx`
+- `src/components/mandant/{mandant-form, mandant-list, mandant-switcher}.tsx`
+- `src/components/shell/{app-shell, sidebar-nav, user-menu}.tsx`
+
+**Form pattern:** react-hook-form + zod resolver for client-side validation, then `useTransition` + server action call. Server-returned `fieldErrors` are mapped back onto the form via `form.setError()`. Loading state always reset (success path uses `window.location.href` so it triggers a full reload that picks up the new session cookies).
+
+**Deviations from spec/design:**
+- Renamed `middleware.ts` → `proxy.ts` and `export async function middleware` → `proxy` (Next.js 16 convention; old name is deprecated).
+- Validator schemas refactored: `mandantInputSchema` → `mandantFormSchema` (all-strings, no preprocess) to fit react-hook-form 7 + Zod 4 typing; empty optional strings are normalized to `null` inside the server action, not the schema.
+- 2FA QR code rendered via `dangerouslySetInnerHTML` from the SVG that Supabase MFA enrollment returns — no extra QR library needed.
+
+**Verification:**
+- `npx tsc --noEmit` — clean
+- `npm test -- --run` — 27 / 27 pass
+- `npm run build` — succeeds, 11 routes generated
+- Dev server smoke test: `/login` 200, `/` and `/dashboard` redirect to `/login?next=…`
+
+**Open items before `/qa` can run:**
+- Manually create a test user in Supabase Dashboard → Authentication → Users (Invite-Only design — no public signup)
+- Configure Supabase Auth settings: disable email confirmation, set min password length 12, enable MFA TOTP, JWT expiry 28800 (8 h)
 
 ## Tech Design (Solution Architect)
 

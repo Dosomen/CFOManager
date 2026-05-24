@@ -106,7 +106,7 @@ export async function requestPasswordResetAction(
   const supabase = await createClient()
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ''
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${siteUrl}/passwort-zuruecksetzen`,
+    redirectTo: `${siteUrl}/auth/callback?next=/passwort-zuruecksetzen`,
   })
   // Always return success — prevents account-existence enumeration.
   return { ok: true }
