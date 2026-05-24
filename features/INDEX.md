@@ -13,9 +13,38 @@
 
 ## Features
 
-| ID | Feature | Status | Spec | Created |
-|----|---------|--------|------|---------|
+| ID | Feature | Priority | Status | Dependencies | Spec | Created |
+|----|---------|----------|--------|--------------|------|---------|
+| PROJ-1 | Supabase Infrastruktur + Multi-Mandant Auth/Login | P0 | Roadmap | None | _pending_ | 2026-05-24 |
+| PROJ-2 | Diamant Datei-Import (CSV/Excel/XML) | P0 | Roadmap | PROJ-1 | _pending_ | 2026-05-24 |
+| PROJ-3 | Reporting & Dashboards (GuV, Bilanz, KPIs) | P0 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
+| PROJ-4 | Liquiditätsplanung & Cash Management | P1 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
+| PROJ-5 | Planung & Forecasting (xP&A) | P1 | Roadmap | PROJ-1, PROJ-2, PROJ-3 | _pending_ | 2026-05-24 |
+| PROJ-6 | Konzern-Konsolidierung (Multi-Mandant) | P1 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
+| PROJ-7 | Diamant REST-API Live-Sync | P1 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
+| PROJ-8 | Team- & Rollenverwaltung | P1 | Roadmap | PROJ-1 | _pending_ | 2026-05-24 |
+| PROJ-9 | ESG-Reporting (ESRS, GHG) | P2 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
+| PROJ-10 | Tax Compliance & Reporting | P2 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
+| PROJ-11 | Lease Accounting (IFRS 16) | P2 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
+| PROJ-12 | XBRL Tagging & Validation | P2 | Roadmap | PROJ-1, PROJ-3 | _pending_ | 2026-05-24 |
+| PROJ-13 | Disclosure Management (AI-gestützt) | P2 | Roadmap | PROJ-1, PROJ-3, PROJ-12 | _pending_ | 2026-05-24 |
 
 <!-- Add features above this line -->
 
-## Next Available ID: PROJ-1
+## Next Available ID: PROJ-14
+
+## Recommended Build Order
+
+1. **PROJ-1** Infrastruktur & Auth (Fundament für alles)
+2. **PROJ-2** Diamant-Import (Daten müssen rein, bevor wir sie anzeigen)
+3. **PROJ-3** Reporting & Dashboards (erster sichtbarer Nutzen)
+4. **PROJ-4** Liquidität — *MVP-Cutoff erreicht, P1 startet*
+5. **PROJ-5** Planung/Forecast
+6. **PROJ-6** Konsolidierung
+7. **PROJ-7** Diamant API
+8. **PROJ-8** Team-Verwaltung — *P1-Cutoff, P2 startet*
+9. **PROJ-9** ESG
+10. **PROJ-10** Tax
+11. **PROJ-11** Lease
+12. **PROJ-12** XBRL
+13. **PROJ-13** Disclosure
