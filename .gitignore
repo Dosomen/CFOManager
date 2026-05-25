@@ -33,9 +33,10 @@ yarn-error.log*
 /test-results/
 /playwright/.cache/
 
-# sample files (real CFO data) - keep dir + README in git, ignore content
+# sample files (real CFO data) - keep dir + README + generators in git, ignore data
 /samples/*
 !/samples/README.md
+!/samples/generate-demo-data.py
 
 # vercel
 .vercel
