@@ -23,21 +23,21 @@ import calendar
 #   AKTIVA / AUFWAND -> Saldo normalerweise im Soll
 #   PASSIVA / ERTRAG -> Saldo normalerweise im Haben
 KONTEN = [
-    # --- Aktiva (Bilanz) ---
+    # --- Aktiva (Bilanz) — SKR03 0000-0799 + 1000-1599 ---
+    ("0410", "Geschäftsausstattung",                          "Aktiva"),
+    ("0420", "Büromaschinen, EDV-Anlagen",                    "Aktiva"),
     ("0700", "Maschinen und maschinelle Anlagen",             "Aktiva"),
-    ("0810", "Geschäftsausstattung",                          "Aktiva"),
-    ("0820", "Büromaschinen, EDV-Anlagen",                    "Aktiva"),
+    ("1000", "Kasse",                                         "Aktiva"),
     ("1200", "Bank",                                          "Aktiva"),
     ("1400", "Forderungen aus Lieferungen und Leistungen",    "Aktiva"),
     ("1576", "Abziehbare Vorsteuer 19 %",                     "Aktiva"),
     ("1577", "Abziehbare Vorsteuer 7 %",                      "Aktiva"),
-    ("1600", "Kasse",                                         "Aktiva"),
 
-    # --- Passiva (Bilanz) ---
-    ("0640", "Darlehen, langfristig",                         "Passiva"),
+    # --- Passiva (Bilanz) — SKR03 0800-0999 + 1600-1999 ---
     ("0800", "Gezeichnetes Kapital",                          "Passiva"),
     ("0860", "Gewinnvortrag vor Verwendung",                  "Passiva"),
     ("0900", "Gesetzliche Rücklage",                          "Passiva"),
+    ("0980", "Darlehen, langfristig",                         "Passiva"),
     ("1610", "Verbindlichkeiten aus Lieferungen und Leistungen", "Passiva"),
     ("1700", "Umsatzsteuer 19 %",                             "Passiva"),
     ("1701", "Umsatzsteuer 7 %",                              "Passiva"),
@@ -78,18 +78,18 @@ KONTEN = [
 # --- Eröffnungsbilanz (zum 1.1. des Jahres, balanced Soll = Haben) ---
 # Diff korrigiert via Gewinnvortrag (0860).
 EB = {
+    "0410": ("Soll",    45_000.00),
+    "0420": ("Soll",    18_500.00),
     "0700": ("Soll",   220_000.00),
-    "0810": ("Soll",    45_000.00),
-    "0820": ("Soll",    18_500.00),
+    "1000": ("Soll",     2_300.00),
     "1200": ("Soll",   185_000.00),
     "1400": ("Soll",    78_400.00),
     "1576": ("Soll",     8_200.00),
     "1577": ("Soll",     1_100.00),
-    "1600": ("Soll",     2_300.00),
-    "0640": ("Haben",  148_000.00),
     "0800": ("Haben",   25_000.00),
     "0860": ("Haben",  280_500.00),   # auto-balance konto (Soll == Haben)
     "0900": ("Haben",   12_500.00),
+    "0980": ("Haben",  148_000.00),
     "1610": ("Haben",   62_450.00),
     "1700": ("Haben",   15_800.00),
     "1701": ("Haben",    1_950.00),
@@ -104,7 +104,7 @@ MONATE = {
         "1400": (175_950.00, 165_200.00),
         "1576": ( 14_402.50,      0.00),
         "1577": (  2_502.50,      0.00),
-        "1600": (    600.00,    410.00),
+        "1000": (    600.00,    410.00),
         "1700": (      0.00, 24_700.00),
         "1701": (      0.00,  2_502.50),
         "1740": (  4_350.00,  4_500.00),
@@ -142,7 +142,7 @@ MONATE = {
         "1400": (162_750.00, 158_000.00),
         "1576": ( 13_847.50,      0.00),
         "1577": (  2_065.00,      0.00),
-        "1600": (    520.00,    380.00),
+        "1000": (    520.00,    380.00),
         "1700": (      0.00, 22_800.00),
         "1701": (      0.00,  2_065.00),
         "1740": (  4_280.00,  4_350.00),
@@ -180,7 +180,7 @@ MONATE = {
         "1400": (180_100.00, 172_800.00),
         "1576": ( 14_877.50,      0.00),
         "1577": (  2_870.00,      0.00),
-        "1600": (    700.00,    540.00),
+        "1000": (    700.00,    540.00),
         "1700": (      0.00, 25_175.00),
         "1701": (      0.00,  2_870.00),
         "1740": (  4_400.00,  4_500.00),

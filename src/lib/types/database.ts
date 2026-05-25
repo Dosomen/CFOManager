@@ -14,6 +14,100 @@ export type Database = {
   }
   public: {
     Tables: {
+      importe: {
+        Row: {
+          anzahl_konten: number
+          anzahl_salden: number
+          created_at: string
+          created_by: string
+          dateiname: string
+          error_message: string | null
+          id: string
+          mandant_id: string
+          periode_jahr: number
+          periode_monat: number
+          status: Database["public"]["Enums"]["import_status"]
+          summe_haben: number
+          summe_soll: number
+        }
+        Insert: {
+          anzahl_konten?: number
+          anzahl_salden?: number
+          created_at?: string
+          created_by: string
+          dateiname: string
+          error_message?: string | null
+          id?: string
+          mandant_id: string
+          periode_jahr: number
+          periode_monat: number
+          status: Database["public"]["Enums"]["import_status"]
+          summe_haben?: number
+          summe_soll?: number
+        }
+        Update: {
+          anzahl_konten?: number
+          anzahl_salden?: number
+          created_at?: string
+          created_by?: string
+          dateiname?: string
+          error_message?: string | null
+          id?: string
+          mandant_id?: string
+          periode_jahr?: number
+          periode_monat?: number
+          status?: Database["public"]["Enums"]["import_status"]
+          summe_haben?: number
+          summe_soll?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "importe_mandant_id_fkey"
+            columns: ["mandant_id"]
+            isOneToOne: false
+            referencedRelation: "mandanten"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      konten: {
+        Row: {
+          bezeichnung: string
+          created_at: string
+          id: string
+          mandant_id: string
+          nummer: string
+          typ: Database["public"]["Enums"]["konten_typ"]
+          updated_at: string
+        }
+        Insert: {
+          bezeichnung: string
+          created_at?: string
+          id?: string
+          mandant_id: string
+          nummer: string
+          typ: Database["public"]["Enums"]["konten_typ"]
+          updated_at?: string
+        }
+        Update: {
+          bezeichnung?: string
+          created_at?: string
+          id?: string
+          mandant_id?: string
+          nummer?: string
+          typ?: Database["public"]["Enums"]["konten_typ"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "konten_mandant_id_fkey"
+            columns: ["mandant_id"]
+            isOneToOne: false
+            referencedRelation: "mandanten"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mandant_users: {
         Row: {
           created_at: string
@@ -76,6 +170,76 @@ export type Database = {
         }
         Relationships: []
       }
+      salden: {
+        Row: {
+          created_at: string
+          eb_haben: number
+          eb_soll: number
+          id: string
+          import_id: string
+          jahr: number
+          konto_id: string
+          mandant_id: string
+          monat: number
+          saldo_haben: number
+          saldo_soll: number
+          vk_haben: number
+          vk_soll: number
+        }
+        Insert: {
+          created_at?: string
+          eb_haben?: number
+          eb_soll?: number
+          id?: string
+          import_id: string
+          jahr: number
+          konto_id: string
+          mandant_id: string
+          monat: number
+          saldo_haben?: number
+          saldo_soll?: number
+          vk_haben?: number
+          vk_soll?: number
+        }
+        Update: {
+          created_at?: string
+          eb_haben?: number
+          eb_soll?: number
+          id?: string
+          import_id?: string
+          jahr?: number
+          konto_id?: string
+          mandant_id?: string
+          monat?: number
+          saldo_haben?: number
+          saldo_soll?: number
+          vk_haben?: number
+          vk_soll?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salden_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "importe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salden_konto_id_fkey"
+            columns: ["konto_id"]
+            isOneToOne: false
+            referencedRelation: "konten"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salden_mandant_id_fkey"
+            columns: ["mandant_id"]
+            isOneToOne: false
+            referencedRelation: "mandanten"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           active_mandant_id: string | null
@@ -110,12 +274,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      import_salden: {
+        Args: {
+          p_dateiname: string
+          p_jahr: number
+          p_konten: Json
+          p_mandant_id: string
+          p_monat: number
+          p_salden: Json
+          p_summe_haben: number
+          p_summe_soll: number
+        }
+        Returns: Json
+      }
       user_has_mandant_access: {
         Args: { p_mandant_id: string }
         Returns: boolean
       }
     }
     Enums: {
+      import_status: "erfolgreich" | "ueberschrieben" | "fehlgeschlagen"
+      konten_typ: "Aktiva" | "Passiva" | "Aufwand" | "Ertrag"
       rechtsform:
         | "GmbH"
         | "AG"
@@ -250,6 +429,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      import_status: ["erfolgreich", "ueberschrieben", "fehlgeschlagen"],
+      konten_typ: ["Aktiva", "Passiva", "Aufwand", "Ertrag"],
       rechtsform: [
         "GmbH",
         "AG",

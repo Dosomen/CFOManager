@@ -2,7 +2,7 @@
 
 > **Hinweis:** Trotz INDEX-Titel im MVP **nur Excel (.xlsx)**, fokussiert auf **Summen-/Saldenliste + Kontenrahmen**. CSV/XML und Buchungsjournal in P1.
 
-## Status: Architected
+## Status: In Progress
 **Created:** 2026-05-24
 **Last Updated:** 2026-05-25
 
@@ -122,6 +122,36 @@
 
 ---
 <!-- Sections below are added by subsequent skills -->
+
+## Implementation Notes (Backend)
+
+**Migration applied:** `supabase/migrations/20260525120000_create_import_schema.sql` — pushed to remote (CFO1, Frankfurt).
+
+**Created tables + enums:** `konten`, `importe`, `salden`; `konten_typ`, `import_status`.
+
+**Created RPC:** `public.import_salden(p_mandant_id, p_jahr, p_monat, p_dateiname, p_konten jsonb, p_salden jsonb, p_summe_soll numeric, p_summe_haben numeric)` — runs the whole import in one transaction (sanity-check orphan salden, mark prior import as „überschrieben", delete old salden, UPSERT konten, insert new salden, finalise import row).
+
+**Created server code:**
+- `src/lib/parser/skr.ts` — SKR03/04 konto-typ derivation
+- `src/lib/parser/diamant.ts` — Excel parser (browser + Node testable via `parseDiamantBuffer`)
+- `src/lib/validators/import.ts` — Zod schemas for the import payload
+- `src/lib/actions/importe.ts` — `createImportAction` (calls the RPC)
+- `src/lib/messages/de.ts` — UI strings extended for the Importe area
+
+**Tests:** 97 / 97 unit tests passing (added 21 in `parser/skr.test.ts` + `parser/diamant.test.ts`; the parser tests use the SKR03 demo files from `samples/`).
+
+**Sample data refactor:** Renamed demo konto numbers to match real SKR03 ranges:
+- `0810/0820 Geschäftsausstattung/Büromaschinen` → `0410/0420` (Aktiva range)
+- `0640 Darlehen` → `0980` (Passiva range)
+- `1600 Kasse` → `1000` (Aktiva range)
+So that the auto-derived `konten_typ` matches the actual semantics on every row.
+
+**Pending (handed off to `/frontend`):**
+- `(app)/importe` Liste mit Empty-State
+- `(app)/importe/neu` 3-Schritt-Wizard (Datei + Periode / Preview / Bestätigen)
+- `(app)/importe/[id]` Detail-Ansicht
+- Sidebar-Eintrag „Importe"
+- Drag-and-Drop + Datei-Validierung (`.xlsx`, ≤ 10 MB)
 
 ## Tech Design (Solution Architect)
 
