@@ -17,7 +17,7 @@ Ein Self-Service-Tool für CFOs und Finanzleiter im deutschen Mittelstand, das F
 | Priorität | ID | Feature | Status |
 |-----------|----|---------|--------|
 | P0 (MVP) | PROJ-1 | Supabase Infrastruktur + Multi-Mandant Auth/Login | In Review |
-| P0 (MVP) | PROJ-2 | Diamant Datei-Import (Excel; CSV/XML in P1) | Planned |
+| P0 (MVP) | PROJ-2 | Diamant Datei-Import (Excel; CSV/XML in P1) | Architected |
 | P0 (MVP) | PROJ-3 | Reporting & Dashboards (GuV, Bilanz, KPIs) | Roadmap |
 | P1 | PROJ-4 | Liquiditätsplanung & Cash Management | Roadmap |
 | P1 | PROJ-5 | Planung & Forecasting (xP&A) | Roadmap |

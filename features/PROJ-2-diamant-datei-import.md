@@ -2,9 +2,9 @@
 
 > **Hinweis:** Trotz INDEX-Titel im MVP **nur Excel (.xlsx)**, fokussiert auf **Summen-/Saldenliste + Kontenrahmen**. CSV/XML und Buchungsjournal in P1.
 
-## Status: Planned
+## Status: Architected
 **Created:** 2026-05-24
-**Last Updated:** 2026-05-24
+**Last Updated:** 2026-05-25
 
 ## Dependencies
 - **Requires PROJ-1** (Auth + Multi-Mandant) — aktiver Mandant aus Session bestimmt Import-Ziel
@@ -105,13 +105,146 @@
 | Konten beim Re-Import behalten | Verhindert Datenverlust bei verzweifelter Diamant-Konfig (z.B. ausgeblendete Konten); explizites Löschen über DB möglich | 2026-05-24 |
 
 ### Technical Decisions
-_To be added by /architecture_
+| Decision | Rationale | Date |
+|----------|-----------|------|
+| Parsing im Browser, nicht auf dem Server | Datei kommt nie auf den Server (DSGVO-Plus, kein Storage); Wizard zeigt Preview ohne Roundtrip; Server bekommt geparstes, validiertes JSON | 2026-05-25 |
+| Library: `xlsx` (SheetJS Community) | Battle-tested, ~150 KB gzipped, robust gegen Excel-Varianten. ExcelJS doppelt so groß für Read-only-Use-Case | 2026-05-25 |
+| Flexible Header-Erkennung (sucht „Konto"-Zeile, nicht hardcoded Zeile 8) | Robust gegen Diamant-Formatvarianten | 2026-05-25 |
+| Postgres-Funktion (RPC) für den Import | Echte DB-Transaktion (alte Salden löschen + Konten upserten + neue Salden inserten + Import-Eintrag) → alles oder nichts | 2026-05-25 |
+| Numerische Werte als Strings Client→Server, Postgres `numeric` für Storage | Vermeidet JavaScript-Float-Ungenauigkeiten; exakte Finanz-Arithmetik | 2026-05-25 |
+| Konten-Typ aus Kontonummer ableiten (SKR03-Bereiche) | Auto-Klassifizierung für GuV/Bilanz-Reports (PROJ-3); Custom-Override → P1 | 2026-05-25 |
+| Kontenrahmen aus Datei-Header lesen | Diamant-Exporte enthalten „Kontenrahmen: SKR03/04" als Metadatum; Fallback Default SKR03 | 2026-05-25 |
+| Eigene Wizard-Seite `/importe/neu`, kein Modal | Drei Schritte mit Preview brauchen Platz; Browser-Back/Forward soll funktionieren | 2026-05-25 |
+| Server Actions, keine REST-Routes | Konsistent mit PROJ-1, type-safe Ende-zu-Ende | 2026-05-25 |
+| Drag-and-Drop nativ statt `react-dropzone` | Browser-API reicht für Single-`.xlsx`-Upload; spart 30 KB Bundle | 2026-05-25 |
+| 3 Tabellen + 2 Enums (konten, salden, importe; konten_typ, import_status) | Klare Trennung von Stammdaten / Bewegungsdaten / Audit-History | 2026-05-25 |
+| RLS mandant-scoped auf allen 3 neuen Tabellen | Defense in depth, konsistent mit PROJ-1-Pattern | 2026-05-25 |
 
 ---
 <!-- Sections below are added by subsequent skills -->
 
 ## Tech Design (Solution Architect)
-_To be added by /architecture_
+
+### Komponenten-Struktur
+
+```
+Sidebar (erweitert um „Importe")
+├── Dashboard
+├── Mandanten
+├── Importe   ← NEU (zwischen Mandanten und Einstellungen)
+└── Einstellungen
+
+(app)/importe                  Liste aller Imports (Tabelle)
+├── Empty-State + CTA „Neuer Import"
+└── Zeilen → Klick öffnet Detail
+
+(app)/importe/neu              Wizard, 3 Schritte
+├── Step 1: Datei + Periode
+│   ├── Drag-Drop-Zone (.xlsx, max 10 MB)
+│   ├── Monat-Picker (Default: letzter abgeschl. Monat)
+│   └── Aktiver Mandant prominent angezeigt
+├── Step 2: Preview + Validierung
+│   ├── Erkannt: Konten-Anzahl, Salden-Anzahl, Kontenrahmen
+│   ├── Plausibilität (Soll = Haben? Spalten OK?)
+│   ├── Warnung bei Periode-Konflikt („wird überschrieben")
+│   └── Erste ~20 Zeilen als Read-only-Tabelle
+└── Step 3: Bestätigen
+    └── „Import bestätigen" → Server-Roundtrip → Toast + Redirect
+
+(app)/importe/[id]             Detail-Ansicht (read-only)
+├── Metadaten (Datum, User, Periode, Datei, Status, Summen)
+└── Konten + Salden als Read-only-Tabelle
+```
+
+### Datenmodell
+
+Drei neue Tabellen plus zwei Enums:
+
+**`konten`** — Kontenrahmen pro Mandant
+- `mandant_id`, `nummer` (z.B. „1200"), `bezeichnung` („Bank")
+- `typ` (Enum `konten_typ`: Aktiva / Passiva / Aufwand / Ertrag — abgeleitet aus SKR03/04-Nummern­bereichen)
+- Eindeutig pro (Mandant, Nummer); UPSERT bei Re-Import erlaubt Bezeichnungs-Updates
+
+**`salden`** — Monatliche Salden pro Konto
+- `mandant_id`, `konto_id`, `jahr`, `monat`
+- Werte: `eb_soll`, `eb_haben`, `vk_soll`, `vk_haben`, `saldo_soll`, `saldo_haben` (alle `numeric`, exakt)
+- `import_id` → Verweis auf den Import-Lauf
+- Eindeutig pro (Konto, Jahr, Monat)
+
+**`importe`** — Import-Historie
+- Wer, wann, welcher Mandant, welche Periode, Dateiname
+- `status` (Enum `import_status`: erfolgreich / überschrieben / fehlgeschlagen)
+- `anzahl_konten`, `anzahl_salden`, `summe_soll`, `summe_haben` (Audit-Snapshot)
+
+**Automatik (Postgres-Funktion `import_salden`):**
+- Atomic-Transaktion: alte `salden` der Periode löschen → vorherigen `importe`-Eintrag auf „überschrieben" setzen → Konten upserten → neue Salden inserten → neuen `importe`-Eintrag mit Status „erfolgreich" anlegen.
+- Bei DB-Fehler: kompletter Rollback, keine halben Daten.
+
+**Row Level Security:** alle 3 Tabellen mandant-scoped — User sieht nur Daten der Mandanten, in denen er Mitglied von `mandant_users` ist. Gleiches Pattern wie PROJ-1.
+
+### Daten-Flow „CFO importiert März 2026"
+
+1. CFO klickt **Sidebar → Importe → Neuer Import** → Wizard öffnet sich
+2. **Step 1:** Drag-Drop von `diamant-summenliste-2026-03.xlsx`; Wizard zeigt aktiven Mandant, Periode (vorausgewählt: letzter abgeschl. Monat), Datei-Info.
+3. Beim „Weiter": Browser parst die Datei via `xlsx`-Library (< 100 ms für ~7 KB).
+4. **Step 2:** Wizard zeigt:
+   - „42 Konten, 42 Salden, Kontenrahmen SKR03"
+   - ✓ „Summe Soll = Summe Haben: 1.155.620,00 €"
+   - ⚠️ „Daten für März 2026 existieren bereits — werden überschrieben" (falls vorhanden)
+   - Tabelle mit ersten 20 Zeilen
+5. **Step 3:** Bei „Import bestätigen":
+   - Server Action erhält JSON-Payload (Konten + Salden + Metadaten)
+   - Server re-validiert mit Zod (Defense in Depth)
+   - Server ruft Postgres-Funktion `import_salden(…)` als eine Transaktion
+   - Erfolg → Toast + Redirect `/importe` mit neuem Eintrag oben
+   - Fehler → Rollback, Wizard zeigt Fehler, gewählte Datei bleibt
+
+### Parsing-Strategie
+
+- Browser-seitig, ohne Server-Upload (DSGVO-konform, kein Storage)
+- Bibliothek: `xlsx` (SheetJS Community), ~150 KB gzipped
+- Header-Erkennung sucht die Zeile, die „Konto" und „Bezeichnung" enthält — robust gegen Format­varianten
+- Daten ab der Folgezeile bis SUMMEN-Zeile oder erster leerer Zeile
+- Werte als Strings extrahiert, Client→Server als Strings, Postgres konvertiert in `numeric` (exakte Finanz-Arithmetik)
+- Kontenrahmen aus Header-Metadaten gelesen, Fallback Default SKR03
+
+### Konten-Typ-Erkennung (SKR03)
+
+Aus der Kontonummer ableiten:
+- `0000–0599`: Aktiva (Anlagevermögen)
+- `0600–0999`: Passiva (Eigenkapital, Darlehen)
+- `1000–1599`: Aktiva (Finanz- und Vorsteuer­konten)
+- `1600–1999`: Passiva (Verbindlichkeiten, USt)
+- `2xxx`: Passiva (Abschluss-/Korrekturkonten)
+- `3xxx, 4xxx, 6xxx, 7xxx`: Aufwand
+- `8xxx`: Ertrag
+- `9xxx`: Sonstige (Default Aktiva)
+
+SKR04 hat andere Bereiche → wird über den Kontenrahmen-Wert aus dem Datei-Header ausgewählt. Custom-Kontenrahmen → User-Override-UI in P1.
+
+### Migration-Plan
+
+Eine neue Migration `20260525xxxxxx_create_import_schema.sql`:
+1. Enums `konten_typ`, `import_status`
+2. Tabelle `konten` + Indexes + RLS-Policies (SELECT/INSERT/UPDATE/DELETE mandant-scoped)
+3. Tabelle `importe` + Indexes + RLS-Policies
+4. Tabelle `salden` + Indexes + RLS-Policies
+5. Postgres-Funktion `public.import_salden(…)` (SECURITY DEFINER, transaktional)
+
+### Neue Dependencies
+
+- **`xlsx` (SheetJS Community)** — Browser-seitiges Excel-Parsing (~150 KB gzipped)
+
+`@supabase/ssr`, `zod`, `react-hook-form`, `lucide-react`, `sonner` sind bereits installiert.
+
+### Erweiterungspunkte für später
+
+- **CSV/XML/DATEV-Parser** → P1: gleiche Pipeline, anderer Parser-Adapter vor dem JSON-Übergang
+- **Mehr-Perioden-Datei** → P1: Wizard erkennt mehrere Monate, lädt batchweise
+- **Buchungsjournal** → P1: neue Tabelle `buchungen`, eigener Wizard, Detail-Drill-Down
+- **Spalten-Mapping-UI** → P1: für Custom-Diamant-Exporte
+- **Diamant API Live-Sync** → PROJ-7: ersetzt Datei-Upload durch Auto-Sync, gleiches Datenmodell
+- **Audit-Diff zwischen Imports** → P2: Detail vergleicht zwei Versionen einer Periode
 
 ## QA Test Results
 _To be added by /qa_
