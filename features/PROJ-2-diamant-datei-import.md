@@ -146,12 +146,32 @@
 - `1600 Kasse` → `1000` (Aktiva range)
 So that the auto-derived `konten_typ` matches the actual semantics on every row.
 
-**Pending (handed off to `/frontend`):**
-- `(app)/importe` Liste mit Empty-State
-- `(app)/importe/neu` 3-Schritt-Wizard (Datei + Periode / Preview / Bestätigen)
-- `(app)/importe/[id]` Detail-Ansicht
-- Sidebar-Eintrag „Importe"
-- Drag-and-Drop + Datei-Validierung (`.xlsx`, ≤ 10 MB)
+## Implementation Notes (Frontend)
+
+**Pages:**
+- `(app)/importe` — Liste aller Imports mit Empty-State und „Neuer Import"-CTA
+- `(app)/importe/neu` — Wizard (2 sichtbare Schritte mit Stepper-UI: Datei + Periode → Preview & Bestätigen; ein Loading-State beim Submit erfüllt das „Schritt 3"-Konzept der Spec semantisch)
+- `(app)/importe/[id]` — Detail-Ansicht (read-only) mit Metadaten + vollständiger Salden-Tabelle
+
+**Components:**
+- `src/components/importe/import-list.tsx` — Tabelle mit Status-Badges, Klick → Detail
+- `src/components/importe/import-wizard.tsx` — Client-Komponente, Drag-Drop nativ, ruft `parseDiamantFile` (Browser) + `checkPeriodExistsAction` + `createImportAction`
+- `src/components/importe/import-detail.tsx` — Read-only Tabelle mit allen Salden (EB/VK/Saldo Soll+Haben)
+- Sidebar erweitert um „Importe" zwischen Mandanten und Einstellungen
+
+**Wizard-Verhalten:**
+- Step 1: Drag-Drop oder Klick → `.xlsx` ≤ 10 MB. Periode default = letzter abgeschlossener Monat.
+- „Weiter" parst die Datei im Browser, prüft via `checkPeriodExistsAction` ob Daten für die Periode existieren, springt zu Step 2.
+- Step 2: Erkannte Konten/Salden-Anzahl, Kontenrahmen, Soll/Haben-Balance-Check (grün/rot), Überschreib-Warnung (gelb), Parser-Errors (rot), Preview der ersten 20 Zeilen.
+- „Import bestätigen" deaktiviert, solange Parser-Errors oder Soll≠Haben.
+- Mandant-Switch während Wizard → automatischer Reset zu Step 1 mit Toast-Hinweis.
+
+**Verifikation:**
+- `npx tsc --noEmit` — clean
+- `npm test -- --run` — 97/97 pass
+- `npm run build` — succeeds, 13 routes inkl. drei neue Importe-Routes
+
+**Status:** Backend + Frontend fertig. Bereit für `/qa`.
 
 ## Tech Design (Solution Architect)
 

@@ -13,6 +13,25 @@ import {
   fieldErrorsFromZod,
 } from '@/lib/actions/types'
 
+export async function checkPeriodExistsAction(
+  jahr: number,
+  monat: number
+): Promise<ActionResult<{ exists: boolean }>> {
+  const supabase = await createClient()
+  const mandantId = await getActiveMandantId()
+  if (!mandantId) return { ok: true, data: { exists: false } }
+
+  const { count } = await supabase
+    .from('importe')
+    .select('id', { count: 'exact', head: true })
+    .eq('mandant_id', mandantId)
+    .eq('periode_jahr', jahr)
+    .eq('periode_monat', monat)
+    .eq('status', 'erfolgreich')
+
+  return { ok: true, data: { exists: (count ?? 0) > 0 } }
+}
+
 export async function createImportAction(
   payload: CreateImportInput
 ): Promise<ActionResult<{ import_id: string; was_overwritten: boolean }>> {
