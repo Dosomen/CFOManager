@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      budgets: {
+        Row: {
+          betrag: number
+          created_at: string
+          id: string
+          jahr: number
+          konto_id: string
+          mandant_id: string
+          updated_at: string
+        }
+        Insert: {
+          betrag?: number
+          created_at?: string
+          id?: string
+          jahr: number
+          konto_id: string
+          mandant_id: string
+          updated_at?: string
+        }
+        Update: {
+          betrag?: number
+          created_at?: string
+          id?: string
+          jahr?: number
+          konto_id?: string
+          mandant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_konto_id_fkey"
+            columns: ["konto_id"]
+            isOneToOne: false
+            referencedRelation: "konten"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_mandant_id_fkey"
+            columns: ["mandant_id"]
+            isOneToOne: false
+            referencedRelation: "mandanten"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       importe: {
         Row: {
           anzahl_konten: number

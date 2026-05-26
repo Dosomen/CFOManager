@@ -12,6 +12,7 @@ export const de = {
   },
   nav: {
     dashboard: 'Dashboard',
+    planung: 'Planung',
     liquiditaet: 'Liquidität',
     mandanten: 'Mandanten',
     importe: 'Importe',
@@ -163,6 +164,33 @@ export const de = {
       description:
         'Importiere deine erste Diamant-Summen-/Saldenliste, um Reports zu sehen.',
       cta: 'Daten importieren',
+    },
+  },
+  budget: {
+    title: 'Planung & Budget',
+    subtitle: 'Geschäftsjahr',
+    monthsElapsed: 'YTD: {n} Monate',
+    tabs: {
+      vergleich: 'Soll-Ist-Vergleich',
+      editor: 'Budget bearbeiten',
+    },
+    editor: {
+      intro:
+        'Pflege deinen Jahres-Budgetwert pro Konto. Für den Soll-Ist-Vergleich wird das Budget proportional zu den vergangenen Monaten verteilt.',
+      ertraegeSection: 'Erträge',
+      aufwendungenSection: 'Aufwendungen',
+      istYtd: 'IST (YTD)',
+      jahresBudget: 'Jahresbudget',
+      save: 'Budget speichern',
+      autofill: 'Aus Vorjahres-IST × 1,05',
+    },
+    compare: {
+      tableTitle: 'Soll-Ist-Vergleich pro Konto',
+      istYtd: 'IST (YTD)',
+      budgetYtd: 'Budget (YTD)',
+      diff: 'Abweichung',
+      noIstYet:
+        'Noch keine IST-Daten für dieses Jahr vorhanden. Lege im Tab „Budget bearbeiten" zuerst dein Budget an.',
     },
   },
   team: {
