@@ -12,6 +12,7 @@ export const de = {
   },
   nav: {
     dashboard: 'Dashboard',
+    liquiditaet: 'Liquidität',
     mandanten: 'Mandanten',
     importe: 'Importe',
     einstellungen: 'Einstellungen',
@@ -161,6 +162,28 @@ export const de = {
       description:
         'Importiere deine erste Diamant-Summen-/Saldenliste, um Reports zu sehen.',
       cta: 'Daten importieren',
+    },
+  },
+  liquidity: {
+    title: 'Liquidität',
+    cards: {
+      bank: 'Bank & Kasse',
+      forderungen: 'Forderungen',
+      verbindlichkeiten: 'Verbindlichkeiten',
+      netto: 'Netto-Liquidität',
+    },
+    trend: {
+      title: 'Liquiditätsverlauf & Prognose',
+      bank: 'Bank & Kasse',
+      netto: 'Netto-Liquidität',
+      forecastNote: 'Schattierter Bereich = Prognose (3 Monate Trend-Extrapolation).',
+      noData: 'Keine Liquiditätsdaten verfügbar',
+    },
+    detail: {
+      forderungenTitle: 'Offene Forderungen',
+      forderungenEmpty: 'Keine offenen Forderungen in diesem Monat.',
+      verbindlichkeitenTitle: 'Offene Verbindlichkeiten',
+      verbindlichkeitenEmpty: 'Keine offenen Verbindlichkeiten in diesem Monat.',
     },
   },
   importe: {

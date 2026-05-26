@@ -2,7 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Building2, FileUp, Settings } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Building2,
+  FileUp,
+  Wallet,
+  Settings,
+} from 'lucide-react'
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -12,6 +18,7 @@ import { de } from '@/lib/messages/de'
 
 const items = [
   { href: '/dashboard', label: de.nav.dashboard, icon: LayoutDashboard },
+  { href: '/liquiditaet', label: de.nav.liquiditaet, icon: Wallet },
   { href: '/mandanten', label: de.nav.mandanten, icon: Building2 },
   { href: '/importe', label: de.nav.importe, icon: FileUp },
   { href: '/einstellungen', label: de.nav.einstellungen, icon: Settings },
