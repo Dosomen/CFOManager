@@ -23,7 +23,7 @@ Ein Self-Service-Tool für CFOs und Finanzleiter im deutschen Mittelstand, das F
 | P1 | PROJ-5 | Planung & Forecasting (xP&A) | Roadmap |
 | P1 | PROJ-6 | Konzern-Konsolidierung (Multi-Mandant) | Roadmap |
 | P1 | PROJ-7 | Diamant REST-API Live-Sync | Roadmap |
-| P1 | PROJ-8 | Team- & Rollenverwaltung | Roadmap |
+| P1 | PROJ-8 | Team- & Rollenverwaltung | In Progress |
 | P2 | PROJ-9 | ESG-Reporting (ESRS, GHG) | Roadmap |
 | P2 | PROJ-10 | Tax Compliance & Reporting | Roadmap |
 | P2 | PROJ-11 | Lease Accounting (IFRS 16) | Roadmap |
