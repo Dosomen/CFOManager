@@ -12,6 +12,7 @@ export const de = {
   },
   nav: {
     dashboard: 'Dashboard',
+    konzern: 'Konzern',
     planung: 'Planung',
     liquiditaet: 'Liquidität',
     mandanten: 'Mandanten',
@@ -164,6 +165,26 @@ export const de = {
       description:
         'Importiere deine erste Diamant-Summen-/Saldenliste, um Reports zu sehen.',
       cta: 'Daten importieren',
+    },
+  },
+  konzern: {
+    title: 'Konzern-Konsolidierung',
+    subtitle: 'Aggregiert über {n} Mandanten',
+    disclaimer: {
+      title: 'Hinweis',
+      body:
+        'Diese Ansicht summiert alle Mandanten ohne Eliminierung von Inter-Company-Buchungen. Eine vollständige Konzern-Konsolidierung (IC-Eliminierung, Endkonsolidierung) kommt in einer späteren Version.',
+    },
+    contributions: {
+      title: 'Beiträge pro Mandant',
+      mandant: 'Mandant',
+      ertraege: 'Erträge',
+      aufwendungen: 'Aufwendungen',
+      ergebnis: 'Ergebnis',
+      bank: 'Bank',
+      forderungen: 'Forderungen',
+      verbindlichkeiten: 'Verbindlichkeiten',
+      total: 'Konzern gesamt',
     },
   },
   budget: {
