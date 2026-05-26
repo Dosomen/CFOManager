@@ -123,6 +123,46 @@ export const de = {
       unexpectedError: 'Es ist ein unerwarteter Fehler aufgetreten.',
     },
   },
+  dashboard: {
+    title: 'Dashboard',
+    subtitle: 'Mandant',
+    kpi: {
+      umsatz: 'Umsatz',
+      aufwand: 'Aufwand',
+      ergebnis: 'Ergebnis',
+      marge: 'Ergebnis-Marge',
+      vsPrevious: 'vs. Vormonat',
+      noPriorPeriod: 'kein Vormonat',
+    },
+    period: {
+      year: 'Jahr',
+      month: 'Monat',
+    },
+    guv: {
+      title: 'Gewinn- und Verlustrechnung',
+      ertraege: 'Erträge',
+      aufwendungen: 'Aufwendungen',
+      ergebnis: 'Ergebnis',
+    },
+    bilanz: {
+      title: 'Bilanz (Monatsende)',
+      aktiva: 'Aktiva',
+      passiva: 'Passiva',
+      differenz: 'Differenz',
+    },
+    trend: {
+      title: 'Umsatz & Ergebnis (12 Monate)',
+      umsatz: 'Umsatz',
+      ergebnis: 'Ergebnis',
+      noData: 'Noch keine Trend-Daten',
+    },
+    emptyState: {
+      title: 'Noch keine Daten',
+      description:
+        'Importiere deine erste Diamant-Summen-/Saldenliste, um Reports zu sehen.',
+      cta: 'Daten importieren',
+    },
+  },
   importe: {
     title: 'Importe',
     description: 'Diamant-Daten importieren und Import-Historie ansehen.',

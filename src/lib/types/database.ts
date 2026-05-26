@@ -271,7 +271,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      salden_monthly_by_typ: {
+        Row: {
+          anzahl_konten: number | null
+          jahr: number | null
+          mandant_id: string | null
+          monat: number | null
+          sum_eb_haben: number | null
+          sum_eb_soll: number | null
+          sum_saldo_haben: number | null
+          sum_saldo_soll: number | null
+          sum_vk_haben: number | null
+          sum_vk_soll: number | null
+          typ: Database["public"]["Enums"]["konten_typ"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salden_mandant_id_fkey"
+            columns: ["mandant_id"]
+            isOneToOne: false
+            referencedRelation: "mandanten"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       import_salden: {
