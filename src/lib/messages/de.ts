@@ -15,6 +15,7 @@ export const de = {
     liquiditaet: 'Liquidität',
     mandanten: 'Mandanten',
     importe: 'Importe',
+    team: 'Team',
     einstellungen: 'Einstellungen',
   },
   auth: {
@@ -162,6 +163,50 @@ export const de = {
       description:
         'Importiere deine erste Diamant-Summen-/Saldenliste, um Reports zu sehen.',
       cta: 'Daten importieren',
+    },
+  },
+  team: {
+    title: 'Team',
+    subtitle: 'Mandant',
+    roles: {
+      owner: 'Owner',
+      member: 'Mitglied',
+    },
+    list: {
+      columnEmail: 'E-Mail',
+      columnRole: 'Rolle',
+      columnJoined: 'Beigetreten',
+      columnActions: 'Aktionen',
+      youSuffix: 'du',
+    },
+    invite: {
+      button: 'Mitglied einladen',
+      dialogTitle: 'Mitglied einladen',
+      dialogDescription:
+        'Wir senden eine E-Mail mit einem Anmeldelink an die angegebene Adresse. Das Mitglied erhält Zugriff auf den aktuell aktiven Mandanten.',
+      emailLabel: 'E-Mail-Adresse',
+      submit: 'Einladung senden',
+    },
+    removeDialog: {
+      titleOther: 'Mitglied entfernen?',
+      titleSelf: 'Selbst aus dem Mandant entfernen?',
+      bodyOther:
+        '{email} wird den Zugriff auf diesen Mandanten verlieren. Die Aktion kann durch erneutes Einladen rückgängig gemacht werden.',
+      bodySelf:
+        'Du wirst den Zugriff auf diesen Mandanten verlieren. Ein Owner muss dich erneut einladen, um wieder Zugang zu erhalten.',
+    },
+    toasts: {
+      invited: 'Einladung an {email} gesendet.',
+      memberRemoved: 'Mitglied entfernt.',
+      leftSelf: 'Du hast den Mandanten verlassen.',
+    },
+    errors: {
+      noActiveMandant: 'Kein aktiver Mandant.',
+      notOwner: 'Nur Owner können diese Aktion durchführen.',
+      inviteFailed: 'Einladung konnte nicht gesendet werden.',
+      alreadyMember: 'Diese E-Mail ist bereits Mitglied dieses Mandanten.',
+      memberNotFound: 'Mitglied nicht gefunden.',
+      lastOwner: 'Der letzte Owner kann nicht entfernt werden.',
     },
   },
   liquidity: {

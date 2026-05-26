@@ -22,7 +22,7 @@
 | PROJ-5 | Planung & Forecasting (xP&A) | P1 | Roadmap | PROJ-1, PROJ-2, PROJ-3 | _pending_ | 2026-05-24 |
 | PROJ-6 | Konzern-Konsolidierung (Multi-Mandant) | P1 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
 | PROJ-7 | Diamant REST-API Live-Sync | P1 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
-| PROJ-8 | Team- & Rollenverwaltung | P1 | Roadmap | PROJ-1 | _pending_ | 2026-05-24 |
+| PROJ-8 | Team- & Rollenverwaltung | P1 | In Progress | PROJ-1 | [PROJ-8](./PROJ-8-team-rollen.md) | 2026-05-24 |
 | PROJ-9 | ESG-Reporting (ESRS, GHG) | P2 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
 | PROJ-10 | Tax Compliance & Reporting | P2 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
 | PROJ-11 | Lease Accounting (IFRS 16) | P2 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |

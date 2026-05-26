@@ -112,16 +112,19 @@ export type Database = {
         Row: {
           created_at: string
           mandant_id: string
+          rolle: Database["public"]["Enums"]["mandant_rolle"]
           user_id: string
         }
         Insert: {
           created_at?: string
           mandant_id: string
+          rolle?: Database["public"]["Enums"]["mandant_rolle"]
           user_id: string
         }
         Update: {
           created_at?: string
           mandant_id?: string
+          rolle?: Database["public"]["Enums"]["mandant_rolle"]
           user_id?: string
         }
         Relationships: [
@@ -310,6 +313,7 @@ export type Database = {
         }
         Returns: Json
       }
+      is_mandant_owner: { Args: { p_mandant_id: string }; Returns: boolean }
       user_has_mandant_access: {
         Args: { p_mandant_id: string }
         Returns: boolean
@@ -318,6 +322,7 @@ export type Database = {
     Enums: {
       import_status: "erfolgreich" | "ueberschrieben" | "fehlgeschlagen"
       konten_typ: "Aktiva" | "Passiva" | "Aufwand" | "Ertrag"
+      mandant_rolle: "owner" | "member"
       rechtsform:
         | "GmbH"
         | "AG"
@@ -454,6 +459,7 @@ export const Constants = {
     Enums: {
       import_status: ["erfolgreich", "ueberschrieben", "fehlgeschlagen"],
       konten_typ: ["Aktiva", "Passiva", "Aufwand", "Ertrag"],
+      mandant_rolle: ["owner", "member"],
       rechtsform: [
         "GmbH",
         "AG",
