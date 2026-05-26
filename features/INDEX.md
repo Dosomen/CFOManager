@@ -19,7 +19,7 @@
 | PROJ-2 | Diamant Datei-Import (Excel; CSV/XML in P1) | P0 | In Progress | PROJ-1 | [PROJ-2](./PROJ-2-diamant-datei-import.md) | 2026-05-24 |
 | PROJ-3 | Reporting & Dashboards (GuV, Bilanz, KPIs) | P0 | In Progress | PROJ-1, PROJ-2 | [PROJ-3](./PROJ-3-reporting-dashboards.md) | 2026-05-24 |
 | PROJ-4 | Liquiditätsplanung & Cash Management | P1 | In Progress | PROJ-1, PROJ-2 | [PROJ-4](./PROJ-4-liquiditaet-cash-management.md) | 2026-05-24 |
-| PROJ-5 | Planung & Forecasting (xP&A) | P1 | Roadmap | PROJ-1, PROJ-2, PROJ-3 | _pending_ | 2026-05-24 |
+| PROJ-5 | Planung & Forecasting (xP&A) | P1 | In Progress | PROJ-1, PROJ-2, PROJ-3 | [PROJ-5](./PROJ-5-planung-forecasting.md) | 2026-05-24 |
 | PROJ-6 | Konzern-Konsolidierung (Multi-Mandant) | P1 | In Progress | PROJ-1, PROJ-2 | [PROJ-6](./PROJ-6-konzern-konsolidierung.md) | 2026-05-24 |
 | PROJ-7 | Diamant REST-API Live-Sync | P1 | Roadmap | PROJ-1, PROJ-2 | _pending_ | 2026-05-24 |
 | PROJ-8 | Team- & Rollenverwaltung | P1 | In Progress | PROJ-1 | [PROJ-8](./PROJ-8-team-rollen.md) | 2026-05-24 |

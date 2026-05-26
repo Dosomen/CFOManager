@@ -20,7 +20,7 @@ Ein Self-Service-Tool für CFOs und Finanzleiter im deutschen Mittelstand, das F
 | P0 (MVP) | PROJ-2 | Diamant Datei-Import (Excel; CSV/XML in P1) | In Progress |
 | P0 (MVP) | PROJ-3 | Reporting & Dashboards (GuV, Bilanz, KPIs) | In Progress |
 | P1 | PROJ-4 | Liquiditätsplanung & Cash Management | In Progress |
-| P1 | PROJ-5 | Planung & Forecasting (xP&A) | Roadmap |
+| P1 | PROJ-5 | Planung & Forecasting (xP&A) | In Progress |
 | P1 | PROJ-6 | Konzern-Konsolidierung (Multi-Mandant) | In Progress |
 | P1 | PROJ-7 | Diamant REST-API Live-Sync | Roadmap |
 | P1 | PROJ-8 | Team- & Rollenverwaltung | In Progress |
